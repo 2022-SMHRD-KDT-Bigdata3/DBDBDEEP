@@ -1,0 +1,19 @@
+names:
+- cat
+- dog
+- middle_glasses
+- middle_knife
+- low_pot
+- high_microwave
+- high_oven
+- middle_vase
+- middle_scissors
+- high_highlight
+- high_stove
+- high_powerSocket
+- high_gasStove
+- low_curtain
+- low_windowBlind
+nc: 15
+train: C:\Users\smhrd\yolov5\data\train2017\train.txt
+val: C:\Users\smhrd\yolov5\data\train2017\val.txt
