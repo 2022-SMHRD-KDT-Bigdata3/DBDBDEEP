@@ -45,6 +45,17 @@ from flask import Flask, Response, render_template
 from threading import Thread
 from queue import Queue
 import cx_Oracle
+from flask import jsonify
+import logging
+
+log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+
+
+LOCATION = r"C:\Users\smhrd\yolov5\instantclient_21_9"
+os.environ["PATH"] = LOCATION + ";" + os.environ["PATH"]
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -80,15 +91,35 @@ t = threading.Thread(target=alterMkBool, args=(mkBool,))
 t.start()
 
 app = Flask(__name__)
+log_path = os.path.join(log_dir, 'app.log')
+app.logger.setLevel(logging.DEBUG)
 
 @app.route("/") 
 def home(): 
     return render_template('index.html')
 
+#nhj
+@app.route("/getimg.html")
+def getimg_html():
+    return render_template("getimg.html")
+
+# ajax 요청을 처리하는 라우트 함수
+@app.route("/get_latest_record")
+def get_latest_record():
+    # 데이터베이스에 연결하여 가장 최근의 레코드를 가져옵니다.
+    connection = cx_Oracle.connect('dbdb/dbdb@project-db-stu.ddns.net:1524/xe')
+    cursor = connection.cursor()
+    cursor.execute("SELECT records_object FROM records WHERE records_num = (SELECT MAX(records_num) FROM records)")
+    record = cursor.fetchone()
+    connection.close()
+    
+    # 가져온 레코드를 ajax 요청에 대한 응답으로 보냅니다.
+    return jsonify({'latest_record': record})
+
+
 @app.route("/getimg")
 def getimg():
-    # return Response(generate_cam00(), mimetype = "multipart/x-mixed-replace; boundary=frame")
-    return render_template('index.html')
+    return Response(generate_cam00(), mimetype = "multipart/x-mixed-replace; boundary=frame")
 
 def generate_cam00():
     weights='./best.pt'  # model path or triton URL
@@ -98,7 +129,7 @@ def generate_cam00():
     conf_thres=0.25  # confidence threshold
     iou_thres=0.45  # NMS IOU threshold
     max_det=1000  # maximum detections per image
-    device='cpu'  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+    device=0  # cuda device, i.e. 0 or 0,1,2,3 or cpu
     view_img=True  # show results
     save_img=True
     save_txt=True  # save results to *.txt

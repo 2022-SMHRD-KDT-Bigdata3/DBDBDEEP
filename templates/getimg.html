@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Get Image</title>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <img src="{{ url_for('getimg') }}" alt="Camera Image">
+    <script>
+        // 데스크톱 알림 권한 요청
+        Notification.requestPermission(function (result) {
+            // 권한 거절
+            if (result == 'denied') {
+                alert('알림을 차단하셨습니다.\n브라우저의 사이트 설정에서 변경하실 수 있습니다.');
+                return false;
+            }
+        });
+
+        // 주기적으로 데이터를 가져오는 함수
+        function getData() {
+            // 최근 레코드를 가져오기 위한 ajax 요청
+            $.ajax({
+                url: '/get_latest_record',
+                type: 'GET',
+                success: function(response) {
+                    // 가져온 데이터를 알림으로 띄워줍니다.
+                    var options = {
+                        body: response.latest_record+"와 접근중! 위험합니다!",
+						requireInteraction: true
+                    };
+                    var notification = new Notification("DBDBDeep", options);
+					console.log("data : " +response.latest_record)
+
+                    setTimeout(function() {
+                        notification.close();
+                    }, 3000);
+                }
+            });
+        }
+
+        // 주기적으로 데이터를 가져오는 함수 호출
+        setInterval(getData, 3000);
+    </script>
+</body>
+</html>
